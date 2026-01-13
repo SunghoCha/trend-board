@@ -1,1 +1,8 @@
-spring.application.name=trend-board
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

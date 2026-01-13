@@ -32,10 +32,20 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // Testcontainers (테스트 환경에서만 동작)
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.2")
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation "org.testcontainers:jdbc"
+    testImplementation 'org.testcontainers:junit-jupiter'
+
+
 }
 
 tasks.named('test') {

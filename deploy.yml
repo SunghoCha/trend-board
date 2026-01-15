@@ -24,7 +24,9 @@
 
     - name: Install Python Docker SDK
       pip:
-        name: docker
+        name:
+          - docker
+          - "requests<2.32.0" # 버전 호환성
         state: present
         executable: pip3
 

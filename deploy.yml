@@ -1,0 +1,46 @@
+- name: Deploy TrendBoard
+  hosts: all
+  become: yes
+  vars:
+    region: "ap-northeast-2"
+    app_image: "sunghochacha/my-board-app:latest" # 젠킨스에서 덮어씀
+
+  tasks:
+    # 0. [필수] 앤서블 모듈을 위한 사전 준비
+    - name: Install Python Docker SDK
+      pip:
+        name: docker
+        state: present
+        executable: pip3 # Amazon Linux 2023 기준 (pip3가 없으면 설치 필요)
+      ignore_errors: yes # 이미 깔려있거나 관리형 환경일 경우 대비
+
+    # 1. SSM 파라미터 가져오기
+    - name: Get DB URL
+      shell: "aws ssm get-parameter --name /trendboard/prod/db/url --query 'Parameter.Value' --output text --region {{ region }}"
+      register: db_url
+
+    - name: Get DB Username
+      shell: "aws ssm get-parameter --name /trendboard/prod/db/username --query 'Parameter.Value' --output text --region {{ region }}"
+      register: db_user
+
+    - name: Get DB Password
+      shell: "aws ssm get-parameter --name /trendboard/prod/db/password --with-decryption --query 'Parameter.Value' --output text --region {{ region }}"
+      register: db_pw
+      no_log: true
+
+    # 2. 도커 컨테이너 상태 관리
+    # 이미지가 안 바뀌었으면 '재시작 안 함(Green)' / 바뀌었으면 '재시작(Yellow)'
+    - name: Run Docker Container (Idempotent)
+      community.docker.docker_container:
+        name: trend-board
+        image: "{{ app_image }}"
+        state: started
+        restart_policy: always
+        pull: yes # 이미지가 다를 때만 Pull 함
+        ports:
+          - "8080:8080"
+        env:
+          DB_URL: "{{ db_url.stdout }}"
+          DB_USERNAME: "{{ db_user.stdout }}"
+          DB_PASSWORD: "{{ db_pw.stdout }}"
+          SPRING_PROFILES_ACTIVE: "prod"

@@ -6,13 +6,27 @@
     app_image: "sunghochacha/my-board-app:latest" # 젠킨스에서 덮어씀
 
   tasks:
-    # 0. [필수] 앤서블 모듈을 위한 사전 준비
+    # 0) 필수 패키지 설치
+    - name: Install required packages
+      dnf:
+        name:
+          - python3
+          - python3-pip
+          - awscli
+          - docker
+        state: present
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
     - name: Install Python Docker SDK
       pip:
         name: docker
         state: present
-        executable: pip3 # Amazon Linux 2023 기준 (pip3가 없으면 설치 필요)
-      ignore_errors: yes # 이미 깔려있거나 관리형 환경일 경우 대비
+        executable: pip3
 
     # 1. SSM 파라미터 가져오기
     - name: Get DB URL

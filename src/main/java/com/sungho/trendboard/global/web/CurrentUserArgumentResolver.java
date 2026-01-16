@@ -23,6 +23,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                             NativeWebRequest webRequest,
                                             @Nullable WebDataBinderFactory binderFactory) throws Exception {
         // TODO: 시큐리티 추가하면 바뀔 로직
+        // required == true인데 없을때 예외 반환
+        boolean required = parameter.getParameterAnnotation(LoginUser.class).required();
         return new CurrentUser(1L, "test", "test@example.com");
     }
 }

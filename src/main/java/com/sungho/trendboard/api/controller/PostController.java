@@ -2,18 +2,18 @@ package com.sungho.trendboard.api.controller;
 
 import com.sungho.trendboard.api.dto.CreatePostRequest;
 import com.sungho.trendboard.api.dto.CreatePostResponse;
-import com.sungho.trendboard.applicatioin.PostService;
-import com.sungho.trendboard.domain.Post;
+import com.sungho.trendboard.api.dto.GetPostResponse;
+import com.sungho.trendboard.application.PostService;
+import com.sungho.trendboard.application.dto.PostDetail;
 import com.sungho.trendboard.global.domain.CurrentUser;
 import com.sungho.trendboard.global.web.LoginUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @Slf4j
 @RestController
@@ -26,9 +26,18 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<CreatePostResponse> createPost(@LoginUser CurrentUser currentUser,
                                                          @RequestBody @Valid CreatePostRequest request) {
-        Post post = postService.create(currentUser.getId(), request);
-        CreatePostResponse response = CreatePostResponse.of(post);
-
-        return ResponseEntity.status(201).body(response);
+        Long postId = postService.createPost(currentUser.getId(), request); // 커맨드객체는 나중에
+        URI location = URI.create("/api/v1/posts/" + postId);
+        return ResponseEntity.created(location).body(new CreatePostResponse(postId));
     }
+
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<GetPostResponse> getPost(@LoginUser(required = false) CurrentUser currentUser,
+                                                   @PathVariable Long postId) {
+        PostDetail postDetail = postService.getPost(postId);
+        // 해당 글의 주인인지 체크
+        boolean isOwner = currentUser != null && postDetail.authorId().equals(currentUser.getId());
+        return ResponseEntity.ok(GetPostResponse.of(postDetail, isOwner));
+    }
+
 }

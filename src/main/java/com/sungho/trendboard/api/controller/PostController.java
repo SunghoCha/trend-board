@@ -1,8 +1,6 @@
 package com.sungho.trendboard.api.controller;
 
-import com.sungho.trendboard.api.dto.CreatePostRequest;
-import com.sungho.trendboard.api.dto.CreatePostResponse;
-import com.sungho.trendboard.api.dto.GetPostResponse;
+import com.sungho.trendboard.api.dto.*;
 import com.sungho.trendboard.application.PostService;
 import com.sungho.trendboard.application.dto.PostDetail;
 import com.sungho.trendboard.global.domain.CurrentUser;
@@ -38,6 +36,12 @@ public class PostController {
         // 해당 글의 주인인지 체크
         boolean isOwner = currentUser != null && postDetail.authorId().equals(currentUser.getId());
         return ResponseEntity.ok(GetPostResponse.of(postDetail, isOwner));
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<GetPostListResponse> getPosts(@ModelAttribute PostSearch postSearch) {
+        GetPostListResponse response = postService.getPostList(postSearch);
+        return ResponseEntity.ok(response);
     }
 
 }

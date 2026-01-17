@@ -1,10 +1,7 @@
 package com.sungho.trendboard.domain;
 
 import com.sungho.trendboard.global.domain.BaseTimeEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +10,7 @@ import org.springframework.util.Assert;
 
 @Getter
 @Entity
+@Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
 

@@ -1,7 +1,10 @@
 package com.sungho.trendboard.application;
 
 import com.sungho.trendboard.api.dto.CreatePostRequest;
+import com.sungho.trendboard.api.dto.GetPostListResponse;
+import com.sungho.trendboard.api.dto.PostSearch;
 import com.sungho.trendboard.application.dto.PostDetail;
+import com.sungho.trendboard.application.dto.PostListItem;
 import com.sungho.trendboard.domain.Post;
 import com.sungho.trendboard.domain.exception.PostNotFoundException;
 import com.sungho.trendboard.global.util.Snowflake;
@@ -11,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -38,5 +42,27 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
         return PostDetail.from(post);
+    }
+
+    @Transactional(readOnly = true)
+    public GetPostListResponse getPostList(PostSearch postSearch) {
+        int page = postSearch.normalizedPage();
+        int size = postSearch.normalizedSize();
+        // size+1로 조회해서 다음 페이지 존재 여부(hasNext)를 판정한다.
+        List<PostListItem> postRows = postRepository.findPostList(postSearch.offset(), size + 1);
+        boolean hasNext = postRows.size() > size;
+        List<PostListItem> postSliced = hasNext ? postRows.subList(0, size) : postRows;
+        return GetPostListResponse.of(toItems(postSliced), page, size, hasNext);
+    }
+
+    private static List<GetPostListResponse.Item> toItems(List<PostListItem> postSliced) {
+        return postSliced.stream()
+                .map(row -> new GetPostListResponse.Item(
+                        row.postId(),
+                        row.authorId(),
+                        row.title(),
+                        row.createdAt()
+                ))
+                .toList();
     }
 }

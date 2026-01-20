@@ -40,6 +40,7 @@ public class PostController {
 
     @GetMapping("/posts")
     public ResponseEntity<GetPostListResponse> getPosts(@ModelAttribute PostSearch postSearch) {
+        log.info("postSearch page : {}, size: {}", postSearch.getPage(), postSearch.getSize());
         GetPostListResponse response = postService.getPostList(postSearch);
         return ResponseEntity.ok(response);
     }

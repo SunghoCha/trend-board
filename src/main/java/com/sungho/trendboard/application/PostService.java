@@ -46,12 +46,17 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public GetPostListResponse getPostList(PostSearch postSearch) {
+        long startNs = System.nanoTime();
         int page = postSearch.normalizedPage();
         int size = postSearch.normalizedSize();
         // size+1로 조회해서 다음 페이지 존재 여부(hasNext)를 판정한다.
-        List<PostListItem> postRows = postRepository.findPostList(postSearch.offset(), size + 1);
+        List<PostListItem> postRows = postRepository.findPostListCoveringIdsThenIn(postSearch.offset(), size + 1);
         boolean hasNext = postRows.size() > size;
         List<PostListItem> postSliced = hasNext ? postRows.subList(0, size) : postRows;
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[PostList] 조회 소요: page={}, size={}, offset={}, elapsedMs={}ms",
+                page, size, postSearch.offset(), elapsedMs);
         return GetPostListResponse.of(toItems(postSliced), page, size, hasNext);
     }
 

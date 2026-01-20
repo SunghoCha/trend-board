@@ -7,4 +7,5 @@ import java.util.List;
 public interface PostRepositoryCustom {
 
     List<PostListItem> findPostList(long offset, int limit);
+    List<PostListItem> findPostListCoveringIdsThenIn(long offset, int limit);
 }

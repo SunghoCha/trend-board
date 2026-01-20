@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true")
 public class PostSeeder implements CommandLineRunner {
 
-    private static final int TOTAL = 1_000_000;
+    private static final int TOTAL = 10_000_000;
     private static final int BATCH_SIZE = 1000;
 
     private final JdbcTemplate jdbcTemplate;
@@ -31,7 +31,6 @@ public class PostSeeder implements CommandLineRunner {
         log.info("============== SEEDER START ==============");
         long startTime = System.currentTimeMillis();
 
-        jdbcTemplate.execute("TRUNCATE TABLE post");
         jdbcTemplate.execute("TRUNCATE TABLE posts");
         log.info("Table Truncated. Starting Insert...");
 

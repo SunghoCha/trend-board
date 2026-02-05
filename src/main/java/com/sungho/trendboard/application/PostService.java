@@ -1,8 +1,6 @@
 package com.sungho.trendboard.application;
 
-import com.sungho.trendboard.api.dto.CreatePostRequest;
-import com.sungho.trendboard.api.dto.GetPostListResponse;
-import com.sungho.trendboard.api.dto.PostSearch;
+import com.sungho.trendboard.api.dto.*;
 import com.sungho.trendboard.application.dto.PostDetail;
 import com.sungho.trendboard.application.dto.PostListItem;
 import com.sungho.trendboard.domain.Post;
@@ -14,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +57,49 @@ public class PostService {
         log.info("[PostList] 조회 소요: page={}, size={}, offset={}, elapsedMs={}ms",
                 page, size, postSearch.offset(), elapsedMs);
         return GetPostListResponse.of(toItems(postSliced), page, size, hasNext);
+    }
+
+    // 커서기반 성능 테스트용. 게시판에선 사용안함
+    @Transactional(readOnly = true)
+    public GetPostCursorListResponse getPostListByCursor(PostCursor cursor, Integer size) {
+        long startNs = System.nanoTime();
+
+        List<PostListItem> rows = postRepository.findPostListByCursor(cursor, size + 1);
+        boolean hasNext = rows.size() > size;
+        List<PostListItem> postSliced = hasNext ? rows.subList(0, size) : rows;
+
+        Long nextCursorId = null;
+        if (hasNext && !postSliced.isEmpty()) {
+            PostListItem last = postSliced.get(postSliced.size() - 1);
+            nextCursorId = last.postId();
+        }
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[PostListCursor] 조회 완료:  cursorId={}, size={}, rows={}, hasNext={}, elapsedMs={}",
+                cursor == null ? null : cursor.id(),
+                size,
+                postSliced.size(),
+                hasNext,
+                elapsedMs
+        );
+
+        return GetPostCursorListResponse.of(
+                toCursorItems(postSliced),
+                size,
+                hasNext,
+                nextCursorId
+        );
+
+    }
+
+    private static List<GetPostCursorListResponse.Item> toCursorItems(List<PostListItem> postSliced) {
+        return postSliced.stream()
+                .map(row -> new GetPostCursorListResponse.Item(
+                        row.postId(),
+                        row.authorId(),
+                        row.title(),
+                        row.createdAt()
+                ))
+                .toList();
     }
 
     private static List<GetPostListResponse.Item> toItems(List<PostListItem> postSliced) {

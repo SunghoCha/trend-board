@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "app.seeder.post.enabled", havingValue = "true")
 public class PostSeeder implements CommandLineRunner {
 
     private static final int TOTAL = 10_000_000;

@@ -1,11 +1,15 @@
 package com.sungho.trendboard.infra.repository;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sungho.trendboard.api.dto.PostCursor;
 import com.sungho.trendboard.application.dto.PostListItem;
 import com.sungho.trendboard.domain.QPost;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.customizers.ParameterObjectNamingStrategyCustomizer;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import static com.sungho.trendboard.domain.QPost.post;
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final ParameterObjectNamingStrategyCustomizer parameterObjectNamingStrategyCustomizer;
 
     @Override
     public List<PostListItem> findPostList(long offset, int limit) {
@@ -73,6 +78,38 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         log.info("[PostListTwoStep] 조회: offset={}, limit={}, idsCount={}, idsMs={}, inMs={}, elapsedMs={}",
                 offset, limit, ids.size(), idsMs, inMs, idsMs + inMs);
         return rows;
+    }
+
+    @Override
+    public List<PostListItem> findPostListByCursor(PostCursor cursor, int limit) {
+
+        long startNs = System.nanoTime();
+        List<PostListItem> rows = queryFactory
+                .select(Projections.constructor(
+                        PostListItem.class,
+                        post.id,
+                        post.authorId,
+                        post.title,
+                        post.createdAt
+                ))
+                .from(post)
+                .where(cursorCondition(cursor))
+                .orderBy(post.id.desc())
+                .limit(limit)
+                .fetch();
+        long elapsedMs  = (System.nanoTime() - startNs) / 1_000_000;
+
+        log.info("[PostListCursor] 조회: cursor={}, limit={}, rows={}, elapsedMs={}",
+                cursor, limit, rows.size(), elapsedMs);
+
+        return rows;
+    }
+
+    private BooleanExpression cursorCondition(PostCursor cursor) {
+        if (cursor == null || cursor.id() == null) {
+            return null;
+        }
+        return (post.id.lt(cursor.id()));
     }
 
 

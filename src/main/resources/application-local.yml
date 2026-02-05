@@ -25,4 +25,7 @@ logging:
 
 app:
   seeder:
-    enabled: false
+    post:
+      enabled: false
+    vote:
+      enabled: true

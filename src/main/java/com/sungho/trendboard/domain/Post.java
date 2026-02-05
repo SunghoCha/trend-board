@@ -26,6 +26,12 @@ public class Post extends BaseTimeEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "up_count", nullable = false)
+    private long upCount;
+
+    @Column(name = "down_count", nullable = false)
+    private long downCount;
+
     @Version
     private Long version;
 
@@ -40,5 +46,17 @@ public class Post extends BaseTimeEntity {
         this.authorId = authorId;
         this.title = title;
         this.content = content;
+    }
+
+    public void increaseUpCount() {
+        this.upCount++;
+    }
+
+    public void increaseDownCount() {
+        this.downCount++;
+    }
+
+    public long voteScore() {
+        return this.upCount - this.downCount;
     }
 }

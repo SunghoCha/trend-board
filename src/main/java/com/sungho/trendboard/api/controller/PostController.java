@@ -32,10 +32,8 @@ public class PostController {
     @GetMapping("/posts/{postId}")
     public ResponseEntity<GetPostResponse> getPost(@LoginUser(required = false) CurrentUser currentUser,
                                                    @PathVariable Long postId) {
-        PostDetail postDetail = postService.getPost(postId);
-        // 해당 글의 주인인지 체크
-        boolean isOwner = currentUser != null && postDetail.authorId().equals(currentUser.getId());
-        return ResponseEntity.ok(GetPostResponse.of(postDetail, isOwner));
+        Long viewerId = currentUser == null ? null : currentUser.getId();
+        return ResponseEntity.ok(postService.getPost(viewerId, postId));
     }
 
     @GetMapping("/posts")

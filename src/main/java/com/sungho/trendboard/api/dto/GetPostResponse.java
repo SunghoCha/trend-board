@@ -1,6 +1,7 @@
 package com.sungho.trendboard.api.dto;
 
 import com.sungho.trendboard.application.dto.PostDetail;
+import com.sungho.trendboard.domain.Post;
 
 import java.time.LocalDateTime;
 
@@ -9,19 +10,19 @@ public record GetPostResponse(
         Long authorId,
         String title,
         String content,
+        boolean owner,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        boolean isOwner
+        LocalDateTime updatedAt
 ) {
-    public static GetPostResponse of(PostDetail postDetail, boolean isOwner) {
+    public static GetPostResponse of(Post post, boolean owner) {
         return new GetPostResponse(
-                postDetail.id(),
-                postDetail.authorId(),
-                postDetail.title(),
-                postDetail.content(),
-                postDetail.createdAt(),
-                postDetail.updatedAt(),
-                isOwner
+                post.getId(),
+                post.getAuthorId(),
+                post.getTitle(),
+                post.getContent(),
+                owner,
+                post.getCreatedAt(),
+                post.getUpdatedAt()
         );
     }
 }

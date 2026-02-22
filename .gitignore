@@ -46,6 +46,7 @@ db/data/
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 # docs
 docs/

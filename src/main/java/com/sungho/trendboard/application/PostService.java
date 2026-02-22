@@ -4,7 +4,8 @@ import com.sungho.trendboard.api.dto.*;
 import com.sungho.trendboard.application.dto.PostDetail;
 import com.sungho.trendboard.application.dto.PostListItem;
 import com.sungho.trendboard.domain.Post;
-import com.sungho.trendboard.domain.exception.PostNotFoundException;
+import com.sungho.trendboard.domain.exception.PostErrorCode;
+import com.sungho.trendboard.global.exception.BusinessException;
 import com.sungho.trendboard.global.util.Snowflake;
 import com.sungho.trendboard.infra.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public GetPostResponse getPost(Long viewerId, Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow(() -> new BusinessException(PostErrorCode.POST_NOT_FOUND));
         boolean isOwner = post.getAuthorId().equals(viewerId);
 
         return GetPostResponse.of(post, isOwner);

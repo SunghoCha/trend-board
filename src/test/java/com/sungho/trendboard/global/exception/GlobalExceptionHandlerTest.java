@@ -68,7 +68,7 @@ class GlobalExceptionHandlerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("COMMON-VALIDATION"))
+                .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
                 .andExpect(jsonPath("$.errors[0].field").value("title"))
                 .andExpect(jsonPath("$.errors[0].rejectedValue").doesNotExist())
                 .andExpect(jsonPath("$.errors[0].reason").exists())
@@ -84,8 +84,8 @@ class GlobalExceptionHandlerTest {
                         .content("{\"title\":\"a\","))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("COMMON-INVALID-JSON"))
-                .andExpect(jsonPath("$.message").value("요청 본문 JSON 형식이 올바르지 않습니다."))
+                .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
+                .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
                 .andExpect(jsonPath("$.path").value("/api/v1/posts"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
@@ -96,7 +96,7 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/api/v1/posts/not-a-number"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("COMMON-VALIDATION"))
+                .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
                 .andExpect(jsonPath("$.errors[0].field").value("postId"))
                 .andExpect(jsonPath("$.errors[0].reason").value("요청 파라미터 타입이 올바르지 않습니다."))
                 .andExpect(jsonPath("$.path").value("/api/v1/posts/not-a-number"))
@@ -111,7 +111,7 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/api/v1/posts/1"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.status").value(500))
-                .andExpect(jsonPath("$.code").value("COMMON-500"))
+                .andExpect(jsonPath("$.code").value("COMMON-INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."))
                 .andExpect(jsonPath("$.path").value("/api/v1/posts/1"))
                 .andExpect(jsonPath("$.timestamp").exists());

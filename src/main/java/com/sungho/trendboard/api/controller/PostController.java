@@ -24,7 +24,7 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<CreatePostResponse> createPost(@LoginUser CurrentUser currentUser,
                                                          @RequestBody @Valid CreatePostRequest request) {
-        Long postId = postService.createPost(currentUser.getId(), request); // 커맨드객체는 나중에
+        Long postId = postService.createPost(currentUser.memberId(), request); // 커맨드객체는 나중에
         URI location = URI.create("/api/v1/posts/" + postId);
         return ResponseEntity.created(location).body(new CreatePostResponse(postId));
     }
@@ -32,7 +32,7 @@ public class PostController {
     @GetMapping("/posts/{postId}")
     public ResponseEntity<GetPostResponse> getPost(@LoginUser(required = false) CurrentUser currentUser,
                                                    @PathVariable Long postId) {
-        Long viewerId = currentUser == null ? null : currentUser.getId();
+        Long viewerId = currentUser == null ? null : currentUser.memberId();
         return ResponseEntity.ok(postService.getPost(viewerId, postId));
     }
 

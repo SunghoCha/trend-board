@@ -25,6 +25,6 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                             @Nullable WebDataBinderFactory binderFactory) {
         // Phase 3에서 Spring Security + Redis 세션 방식으로 교체 예정
         boolean required = parameter.getParameterAnnotation(LoginUser.class).required();
-        return new CurrentUser(1L, MemberRole.USER);
+        return new CurrentUser(1L, MemberRole.ADVERTISER);
     }
 }

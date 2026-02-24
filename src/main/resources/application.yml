@@ -4,7 +4,7 @@ spring:
   profiles:
     default: local
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
 
 management:

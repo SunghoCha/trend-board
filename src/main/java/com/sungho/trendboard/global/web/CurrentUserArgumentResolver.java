@@ -1,8 +1,11 @@
 package com.sungho.trendboard.global.web;
 
+import com.sungho.trendboard.domain.MemberRole;
 import com.sungho.trendboard.global.domain.CurrentUser;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -13,7 +16,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean hasAnnotation = parameter.hasParameterAnnotation(LoginUser.class);
-        boolean isSupportedType  = CurrentUser.class.equals(parameter.getParameterType());
+        boolean isSupportedType = CurrentUser.class.equals(parameter.getParameterType());
         return hasAnnotation && isSupportedType;
     }
 
@@ -21,10 +24,17 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     public @Nullable Object resolveArgument(MethodParameter parameter,
                                             @Nullable ModelAndViewContainer mavContainer,
                                             NativeWebRequest webRequest,
-                                            @Nullable WebDataBinderFactory binderFactory) throws Exception {
-        // TODO: 시큐리티 추가하면 바뀔 로직
-        // required == true인데 없을때 예외 반환
+                                            @Nullable WebDataBinderFactory binderFactory) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CurrentUser currentUser) {
+            return currentUser;
+        }
+
+        // Phase 3에서 Spring Security + Redis 세션 방식으로 교체 예정
         boolean required = parameter.getParameterAnnotation(LoginUser.class).required();
-        return new CurrentUser(1L, "test", "test@example.com");
+        if (!required) {
+            return null;
+        }
+        return new CurrentUser(1L, MemberRole.ADVERTISER);
     }
 }

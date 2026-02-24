@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -14,14 +15,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-
+@Order(1)
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "app.seeder.post.enabled", havingValue = "true")
 public class PostSeeder implements CommandLineRunner {
 
-    private static final int TOTAL = 10_000_000;
+    private static final int TOTAL = 300_000;
     private static final int BATCH_SIZE = 1000;
 
     private final JdbcTemplate jdbcTemplate;
@@ -42,9 +43,9 @@ public class PostSeeder implements CommandLineRunner {
 
     private void seed() {
         String sql = """
-                    INSERT INTO posts (id, author_id, title, content, created_at, updated_at, version)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
+        INSERT INTO posts (id, author_id, title, content, created_at, updated_at, up_count, down_count, version)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
         LocalDateTime bastTime = LocalDateTime.now();
         for (int start = 1; start <= TOTAL; start += BATCH_SIZE) {
@@ -79,7 +80,12 @@ public class PostSeeder implements CommandLineRunner {
                 ps.setString(4, content);
                 ps.setTimestamp(5, ts);
                 ps.setTimestamp(6, ts);
-                ps.setLong(7, 0L);
+
+                ps.setLong(7, 0L); // up_count
+                ps.setLong(8, 0L); // down_count
+                ps.setLong(9, 0L); // version (초기값)
+
+
             }
 
             @Override

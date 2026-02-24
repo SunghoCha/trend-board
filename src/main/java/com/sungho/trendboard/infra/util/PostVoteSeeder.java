@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -14,21 +15,22 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.SplittableRandom;
 
+@Order(2)
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "app.seeder.vote.enabled", havingValue = "true")
 public class PostVoteSeeder implements CommandLineRunner {
 
-    private static final long TOTAL_POSTS = 10_000_000L;
+    private static final long TOTAL_POSTS = 300_000L;
 
-    private static final int TOTAL_VOTES = 5_000_000;
+    private static final int TOTAL_VOTES = 1_000_000;
     private static final int BATCH_SIZE = 5000;
 
-    private static final long HOT_POST_COUNT = 100_000L;
+    private static final long HOT_POST_COUNT = 50_000L;
     private static final double HOT_VOTE_SHARE = 0.80;
 
-    private static final long USER_COUNT = 1_000_000L;
+    private static final long USER_COUNT = 100_000L;
     private static final double LIKE_RATIO = 0.90;
 
     private static final int RECENT_SECONDS = 21_600; // 6시간

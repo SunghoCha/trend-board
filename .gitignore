@@ -1,3 +1,4 @@
+AGENTS.md
 HELP.md
 .gradle
 build/
@@ -42,3 +43,23 @@ out/
 
 # DB data
 db/data/
+
+# Claude Code
+.claude/
+
+# docs
+docs/
+
+# Shrimp Task Manager
+.shrimp-tasks/
+
+#etc
+dealspot-plan.md
+front-prd.md
+front-planner.md
+prd-validator.md
+back-planner.md
+back-prd-output.md
+back-prd.md
+.mcp.json
+ROADMAP.md

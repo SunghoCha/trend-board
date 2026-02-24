@@ -1,4 +1,4 @@
-- name: Deploy TrendBoard
+- name: Deploy TrendBoard # 사용못할듯
   hosts: all
   become: yes
   vars:

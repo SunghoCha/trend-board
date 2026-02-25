@@ -109,6 +109,47 @@ class PostServiceTest {
     }
 
     @Test
+    void 태그ID가_중복되어도_중복제거후_정상_생성된다() {
+        // given
+        CurrentUser advertiser = new CurrentUser(10L, MemberRole.ADVERTISER);
+        CreatePostRequest request = new CreatePostRequest(
+                "태그 중복 제목", "태그 중복 내용", PostCategory.FOOD, List.of(1L, 1L, 2L), List.of("브런치")
+        );
+        Tag tag1 = mock(Tag.class);
+        Tag tag2 = mock(Tag.class);
+        given(tag1.getId()).willReturn(1L);
+        given(tag2.getId()).willReturn(2L);
+        given(tagRepository.findAllById(List.of(1L, 2L))).willReturn(List.of(tag1, tag2));
+        given(postRepository.save(any(Post.class))).willAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        CreatePostResponse response = postService.createPost(advertiser, request);
+
+        // then
+        then(tagRepository).should(times(1)).findAllById(List.of(1L, 2L));
+        then(postRepository).should(times(1)).save(any(Post.class));
+        assertThat(response.tagIds()).containsExactly(1L, 2L);
+    }
+
+    @Test
+    void 해시태그가_중복되어도_중복제거후_정상_생성된다() {
+        // given
+        CurrentUser advertiser = new CurrentUser(10L, MemberRole.ADVERTISER);
+        CreatePostRequest request = new CreatePostRequest(
+                "해시태그 중복 제목", "해시태그 중복 내용", PostCategory.FOOD, null, List.of("브런치", "브런치")
+        );
+        given(postRepository.save(any(Post.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        CreatePostResponse response = postService.createPost(advertiser, request);
+
+        // then
+        then(postRepository).should(times(1)).save(any(Post.class));
+        assertThat(response.hashtags()).containsExactly("브런치");
+    }
+
+    @Test
     void USER_역할이면_FORBIDDEN_예외를_던진다() {
         // given
         CurrentUser user = new CurrentUser(10L, MemberRole.USER);

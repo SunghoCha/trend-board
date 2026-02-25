@@ -188,20 +188,27 @@ class PostControllerTest {
 
     @Test
     @WithAccount(memberId = 1L, role = MemberRole.ADVERTISER)
-    void 해시태그가_중복이면_400_에러를_반환한다() throws Exception {
+    void 해시태그가_중복이어도_중복제거후_201_응답을_반환한다() throws Exception {
         // given
         CreatePostRequest request = new CreatePostRequest(
                 "테스트 제목", "테스트 내용", PostCategory.FOOD, List.of(1L), List.of("맛집", "맛집")
         );
+        CreatePostResponse response = new CreatePostResponse(
+                1L, 1L, "테스트 제목", "테스트 내용",
+                PostCategory.FOOD, List.of(1L), List.of("맛집"), 0,
+                LocalDateTime.now(), LocalDateTime.now()
+        );
+
+        given(postService.createPost(any(), any(CreatePostRequest.class)))
+                .willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
-                .andExpect(jsonPath("$.errors[0].field", Matchers.containsString("hashtags")));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.hashtags[0]").value("맛집"));
     }
 
     @Test
@@ -243,20 +250,27 @@ class PostControllerTest {
 
     @Test
     @WithAccount(memberId = 1L, role = MemberRole.ADVERTISER)
-    void 태그ID가_중복이면_400_에러를_반환한다() throws Exception {
+    void 태그ID가_중복이어도_중복제거후_201_응답을_반환한다() throws Exception {
         // given
         CreatePostRequest request = new CreatePostRequest(
                 "테스트 제목", "테스트 내용", PostCategory.FOOD, List.of(1L, 1L), List.of("맛집")
         );
+        CreatePostResponse response = new CreatePostResponse(
+                1L, 1L, "테스트 제목", "테스트 내용",
+                PostCategory.FOOD, List.of(1L), List.of("맛집"), 0,
+                LocalDateTime.now(), LocalDateTime.now()
+        );
+
+        given(postService.createPost(any(), any(CreatePostRequest.class)))
+                .willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
-                .andExpect(jsonPath("$.errors[0].field", Matchers.containsString("tagIds")));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.tagIds[0]").value(1L));
     }
 
     @Test

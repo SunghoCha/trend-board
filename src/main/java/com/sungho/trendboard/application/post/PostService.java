@@ -56,9 +56,16 @@ public class PostService {
             return;
         }
 
-        List<Tag> tags = tagRepository.findAllById(tagIds);
-        if (tags.size() != tagIds.size()) {
-            log.info("존재하지 않는 태그 포함: requestedTagIds={}, foundCount={}", tagIds, tags.size());
+        List<Long> distinctTagIds = tagIds.stream()
+                .distinct()
+                .toList();
+
+        List<Tag> tags = tagRepository.findAllById(distinctTagIds);
+        if (tags.size() != distinctTagIds.size()) {
+            log.info("존재하지 않는 태그 포함: requestedTagIds={}, distinctTagIds={}, foundCount={}",
+                    tagIds,
+                    distinctTagIds,
+                    tags.size());
             throw new BusinessException(PostErrorCode.TAG_NOT_FOUND);
         }
 

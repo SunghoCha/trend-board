@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.util.List;
 
@@ -21,14 +20,12 @@ public record CreatePostRequest(
         PostCategory category,
 
         @Size(max = 10, message = "태그는 최대 10개까지 선택할 수 있습니다.")
-        @UniqueElements(message = "태그 ID는 중복될 수 없습니다.")
         List<
                 @NotNull(message = "태그 ID는 필수입니다.")
-                @Positive(message = "태그 ID는 1 이상이어야 합니다.")
+        @Positive(message = "태그 ID는 1 이상이어야 합니다.")
                         Long> tagIds,
 
         @Size(max = 10, message = "해시태그는 최대 10개까지 입력할 수 있습니다.")
-        @UniqueElements(message = "해시태그는 중복될 수 없습니다.")
         List<
                 @NotBlank(message = "해시태그는 공백일 수 없습니다.")
                 @Size(max = 50, message = "해시태그는 50자 이하여야 합니다.")

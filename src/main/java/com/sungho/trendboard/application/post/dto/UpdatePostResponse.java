@@ -19,13 +19,6 @@ public record UpdatePostResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    /**
-     * Create an UpdatePostResponse DTO from a Post entity.
-     *
-     * @param post the source Post entity to extract values from
-     * @return an UpdatePostResponse containing the post's id, memberId, title, content, category,
-     *         list of tag IDs, list of hashtag names, likeCount, createdAt, and updatedAt
-     */
     public static UpdatePostResponse from(Post post) {
         return new UpdatePostResponse(
                 post.getId(),

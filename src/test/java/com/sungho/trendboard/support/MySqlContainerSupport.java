@@ -15,19 +15,6 @@ public abstract class MySqlContainerSupport {
         MYSQL_CONTAINER.start();
     }
 
-    /**
-     * Registers Spring datasource properties using values from the MySQL Testcontainers instance.
-     *
-     * <p>The method exposes the following properties into Spring's environment:
-     * <ul>
-     *   <li>spring.datasource.url</li>
-     *   <li>spring.datasource.username</li>
-     *   <li>spring.datasource.password</li>
-     *   <li>spring.datasource.driver-class-name</li>
-     * </ul>
-     *
-     * @param registry the DynamicPropertyRegistry used to register configuration properties
-     */
     @DynamicPropertySource
     static void configureDataSource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", MYSQL_CONTAINER::getJdbcUrl);

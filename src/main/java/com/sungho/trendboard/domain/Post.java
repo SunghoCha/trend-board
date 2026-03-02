@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Entity
@@ -92,6 +91,14 @@ public class Post extends BaseTimeEntity {
         this.postTags.add(PostTag.of(this, tag));
     }
 
+    /**
+     * Adds a hashtag to the post if not already present.
+     *
+     * The provided hashtag is trimmed before being added; duplicate names (after trimming) are ignored.
+     *
+     * @param hashtag the hashtag text to add; leading and trailing whitespace will be removed
+     * @throws IllegalArgumentException if {@code hashtag} is null or blank after trimming
+     */
     public void addHashtag(String hashtag) {
         if (hashtag == null) {
             throw new IllegalArgumentException("hashtag는 필수입니다.");
@@ -109,10 +116,68 @@ public class Post extends BaseTimeEntity {
         this.postHashtags.add(PostHashtag.of(this, normalized));
     }
 
+    /**
+     * Update the post's title, content, and category.
+     *
+     * @param title    the new title; must not be null or blank
+     * @param content  the new content; must not be null or blank
+     * @param category the new category; must not be null
+     * @throws IllegalArgumentException if `title` or `content` is null or blank, or if `category` is null
+     */
+    public void update(String title, String content, PostCategory category) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title은 필수입니다.");
+        }
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("content는 필수입니다.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("category는 필수입니다.");
+        }
+
+        this.title = title;
+        this.content = content;
+        this.category = category;
+    }
+
+    /**
+     * Replace the post's tag associations with the provided list of tags.
+     *
+     * @param tags the tags to associate with this post; if `null` or empty, all existing associations are removed and no new associations are added
+     */
+    public void replacePostTags(List<Tag> tags) {
+        this.postTags.clear();
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+        tags.forEach(this::addPostTag);
+    }
+
+    /**
+     * Replaces the post's hashtags with the provided list.
+     *
+     * Clears all existing hashtags and adds each non-null, non-blank, trimmed hashtag from the given list.
+     * Duplicate names are ignored; passing `null` or an empty list results in no hashtags.
+     *
+     * @param hashtags list of hashtag names to set on the post; may be null
+     */
+    public void replaceHashtags(List<String> hashtags) {
+        this.postHashtags.clear();
+        initializeHashtags(hashtags);
+    }
+
+    /**
+     * Initialize the post's hashtags from the given list.
+     *
+     * Adds each hashtag string in the provided list to this post. If the list is null or empty,
+     * no hashtags are added.
+     *
+     * @param hashtags list of hashtag strings; may be null or empty
+     */
     private void initializeHashtags(List<String> hashtags) {
-        List<String> safeHashtags = hashtags != null ? List.copyOf(hashtags) : List.of();
-        safeHashtags.stream()
-                .filter(Objects::nonNull)
-                .forEach(this::addHashtag);
+        if (hashtags == null || hashtags.isEmpty()) {
+            return;
+        }
+        hashtags.forEach(this::addHashtag);
     }
 }

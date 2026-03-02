@@ -25,13 +25,6 @@ public class PostController {
 
     private final PostService postService;
 
-    /**
-     * Create a new post on behalf of the authenticated user.
-     *
-     * @param currentUser the authenticated user creating the post
-     * @param request     the request payload containing the post's data
-     * @return            a ResponseEntity containing the created post and HTTP status 201 (Created)
-     */
     @PostMapping
     public ResponseEntity<CreatePostResponse> createPost(@LoginUser CurrentUser currentUser,
                                                    @RequestBody @Valid CreatePostRequest request) {
@@ -39,14 +32,6 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Updates an existing post identified by {@code postId} with the provided data on behalf of the authenticated user.
-     *
-     * @param postId       the id of the post to update
-     * @param currentUser  the authenticated user performing the update
-     * @param request      the update payload containing fields to change
-     * @return              the updated post representation
-     */
     @PutMapping("/{postId}")
     public ResponseEntity<UpdatePostResponse> updatePost(@PathVariable Long postId,
                                                          @LoginUser CurrentUser currentUser,

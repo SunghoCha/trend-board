@@ -1,13 +1,4 @@
 spring:
-  datasource:
-    # jdbc:tc: 접두사로 Testcontainers 자동 실행
-    url: jdbc:tc:mysql:8.0:///trendboard?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-
-    # Testcontainers가 알아서 처리하므로 더미 값 입력
-    username: test
-    password: test
-
   jpa:
     hibernate:
       ddl-auto: create

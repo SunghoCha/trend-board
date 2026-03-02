@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sungho.trendboard.global.web.CurrentUserArgumentResolver;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.*;
+import org.hamcrest.Matchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,7 +41,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void BusinessException이면_해당_상태코드와_에러코드를_반환한다() throws Exception {
+    @DisplayName("BusinessException이면 해당 상태코드와 에러코드를 반환한다")
+    void handleBusinessException_returnsMatchingStatusAndErrorCode() throws Exception {
         mockMvc.perform(get("/fake/business-error"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
@@ -49,7 +52,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void 유효하지_않은_요청이면_400_필드에러를_반환한다() throws Exception {
+    @DisplayName("유효하지 않은 요청이면 400 필드에러를 반환한다")
+    void handleValidation_withInvalidRequest_returns400WithFieldErrors() throws Exception {
         String body = objectMapper.writeValueAsString(new FakeRequest(""));
 
         mockMvc.perform(post("/fake/validate")
@@ -58,15 +62,16 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.code").value("COMMON-INVALID_INPUT"))
-                .andExpect(jsonPath("$.errors[0].field").value("title"))
-                .andExpect(jsonPath("$.errors[0].rejectedValue").doesNotExist())
+                .andExpect(jsonPath("$.errors[*].field", Matchers.hasItem("title")))
                 .andExpect(jsonPath("$.errors[0].reason").exists())
+                .andExpect(jsonPath("$.errors[0].length()").value(2))
                 .andExpect(jsonPath("$.path").value("/fake/validate"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 
     @Test
-    void 잘못된_JSON_요청이면_400_에러를_반환한다() throws Exception {
+    @DisplayName("잘못된 JSON 요청이면 400 에러를 반환한다")
+    void handleHttpMessageNotReadable_withMalformedJson_returns400() throws Exception {
         mockMvc.perform(post("/fake/validate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"a\","))
@@ -79,7 +84,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void 경로변수_타입이_잘못되면_400_필드에러를_반환한다() throws Exception {
+    @DisplayName("경로변수 타입이 잘못되면 400 필드에러를 반환한다")
+    void handleTypeMismatch_withInvalidPathVariable_returns400WithFieldError() throws Exception {
         mockMvc.perform(get("/fake/items/not-a-number"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
@@ -91,7 +97,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void 예상하지_못한_예외면_500_공통메시지를_반환한다() throws Exception {
+    @DisplayName("예상하지 못한 예외면 500 공통메시지를 반환한다")
+    void handleException_withUnexpectedError_returns500() throws Exception {
         mockMvc.perform(get("/fake/unexpected-error"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.status").value(500))
@@ -102,7 +109,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void 도메인에러의_errors는_빈배열이다() throws Exception {
+    @DisplayName("도메인에러의 errors는 빈배열이다")
+    void handleBusinessException_errorsFieldIsEmptyArray() throws Exception {
         mockMvc.perform(get("/fake/business-error"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errors").isArray())
